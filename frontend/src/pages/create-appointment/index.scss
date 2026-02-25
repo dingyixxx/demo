@@ -68,10 +68,19 @@
   border: 1px solid #e0e3f0;
 }
 
+.radio-item--disabled {
+  background: #f2f2f2;
+  border-color: #dddddd;
+}
+
 .radio-text {
   font-size: 26px;
   color: #333;
   margin-left: 8px;
+}
+
+.radio-text--disabled {
+  color: #aaaaaa;
 }
 
 /* 选中态：利用小程序的 checked + 样式 */

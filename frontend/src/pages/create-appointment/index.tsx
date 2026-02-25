@@ -34,6 +34,27 @@ export default function Appointment() {
     fetchMyAppointments();
   }, []);
 
+  // 判断某个时间段在当前日期是否已被预约
+  const isSlotDisabled = (slot: string) =>
+    appointments.some(
+      (item: any) =>
+        item.appointmentDate === date &&
+        item.timeSlot === slot &&
+        item.status === 'BOOKED'
+    );
+
+  // 当日期或预约列表变化时，如果当前选中的时间段已被占用，则自动切换到第一个可用时间段
+  useEffect(() => {
+    const currentDisabled = isSlotDisabled(timeSlot);
+    if (!currentDisabled) {
+      return;
+    }
+    const firstAvailable = timeSlots.find((slot) => !isSlotDisabled(slot));
+    if (firstAvailable) {
+      setTimeSlot(firstAvailable);
+    }
+  }, [date, appointments]);
+
   const handleCreate = async () => {
     if (!serviceName.trim()) {
       Taro.showToast({ title: '请填写服务名称', icon: 'none' });
@@ -41,12 +62,7 @@ export default function Appointment() {
     }
 
     // 前端时间冲突校验：同一天、相同时间段且已是 BOOKED 状态
-    const hasConflict = appointments.some(
-      (item: any) =>
-        item.appointmentDate === date &&
-        item.timeSlot === timeSlot &&
-        item.status === 'BOOKED'
-    );
+    const hasConflict = isSlotDisabled(timeSlot);
 
     if (hasConflict) {
       Taro.showToast({ title: '该时间段已有预约，请选择其他时间', icon: 'none' });
@@ -107,12 +123,26 @@ export default function Appointment() {
           onChange={(e) => setTimeSlot(e.detail.value as string)}
           className="radio-group"
         >
-          {timeSlots.map((slot) => (
-            <Label key={slot} className="radio-item">
-              <Radio value={slot} checked={slot === timeSlot} />
-              <Text className="radio-text">{slot}</Text>
-            </Label>
-          ))}
+          {timeSlots.map((slot) => {
+            const disabled = isSlotDisabled(slot);
+            const checked = slot === timeSlot && !disabled;
+            return (
+              <Label
+                key={slot}
+                className={`radio-item ${disabled ? 'radio-item--disabled' : ''}`}
+              >
+                <Radio value={slot} checked={checked} disabled={disabled} />
+                <Text
+                  className={`radio-text ${
+                    disabled ? 'radio-text--disabled' : ''
+                  }`}
+                >
+                  {slot}
+                  {disabled ? '（已约满）' : ''}
+                </Text>
+              </Label>
+            );
+          })}
         </RadioGroup>
 
         <Button className="btn" type="primary" onClick={handleCreate}>
