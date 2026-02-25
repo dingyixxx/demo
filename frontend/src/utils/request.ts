@@ -33,12 +33,38 @@ const request = (options: any) => {
       data: data,
       header: headers,
       success: (res) => {
-        if (res.statusCode === 200) {
-          resolve(res.data);
-        } else {
-          Taro.showToast({ title: res.data?.message || '请求失败', icon: 'none' });
-          reject(res.data);
+        const body: any = res.data || {};
+
+        // 1. 处理未登录 / Token 失效（兼容 HTTP 401 或 200 + 业务 code 401）
+        const isUnauthorized =
+          res.statusCode === 401 || body?.code === 401;
+
+        if (isUnauthorized) {
+          // 清除本地 token
+          Taro.removeStorageSync('token');
+          Taro.showToast({
+            title: body?.message || '登录状态已失效，请重新登录',
+            icon: 'none',
+          });
+
+          // 跳转到登录页
+          setTimeout(() => {
+            Taro.reLaunch({ url: '/pages/login/index' });
+          }, 500);
+
+          reject(body);
+          return;
         }
+
+        // 2. 正常返回（HTTP 200 并且业务 code 为 200 或没有 code 字段）
+        if (res.statusCode === 200 && (body.code === 200 || body.code === undefined)) {
+          resolve(body);
+          return;
+        }
+
+        // 3. 其它错误情况
+        Taro.showToast({ title: body?.message || '请求失败', icon: 'none' });
+        reject(body);
       },
       fail: (err) => {
         console.error('Request error:', err);

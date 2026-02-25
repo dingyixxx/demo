@@ -1,5 +1,6 @@
 package com.example.appointmentservice.exception;
 
+import com.example.appointmentservice.auth.UnauthorizedException;
 import com.example.appointmentservice.dto.ApiResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,6 +25,15 @@ public class GlobalExceptionHandler {
 
         // 返回统一的响应结构给前端，code 使用 400 表示参数错误
         return ApiResponse.error(400, message);
+    }
+
+    /**
+     * 统一处理未登录/Token 失效
+     */
+    @ExceptionHandler(UnauthorizedException.class)
+    public ApiResponse<Void> handleUnauthorized(UnauthorizedException ex) {
+        String message = ex.getMessage() != null ? ex.getMessage() : "未登录或 Token 失效";
+        return ApiResponse.error(401, message);
     }
 }
 

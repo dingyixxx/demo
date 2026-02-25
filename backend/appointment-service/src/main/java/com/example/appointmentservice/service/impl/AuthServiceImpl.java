@@ -7,6 +7,7 @@ import com.example.appointmentservice.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -17,9 +18,24 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private UserMapper userMapper;
 
-    // 模拟 Token 存储 (Key: token, Value: userId)
-    // 生产环境请替换为 Redis
-    private final Map<String, Long> tokenStore = new HashMap<>();
+    // Token 有效期（分钟）——当前按你的要求设为 1 分钟，方便测试
+    private static final long TOKEN_TTL_MINUTES = 600L;
+
+    /**
+     * 模拟 Token 存储 (Key: token, Value: TokenInfo)
+     * 生产环境请替换为 Redis / JWT 等
+     */
+    private final Map<String, TokenInfo> tokenStore = new HashMap<>();
+
+    private static class TokenInfo {
+        private final Long userId;
+        private final LocalDateTime expiresAt;
+
+        private TokenInfo(Long userId, LocalDateTime expiresAt) {
+            this.userId = userId;
+            this.expiresAt = expiresAt;
+        }
+    }
 
     @Override
     public String login(String phone, String code) {
@@ -41,9 +57,10 @@ public class AuthServiceImpl implements AuthService {
             userMapper.insert(user); // MP 自动插入并回填 ID
         }
 
-        // 4. 生成 Token
+        // 4. 生成 Token，并设置过期时间
         String token = UUID.randomUUID().toString();
-        tokenStore.put(token, user.getId());
+        LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(TOKEN_TTL_MINUTES);
+        tokenStore.put(token, new TokenInfo(user.getId(), expiresAt));
 
         return token;
     }
@@ -51,6 +68,19 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public Long getUserIdByToken(String token) {
         if (token == null) return null;
-        return tokenStore.get(token);
+
+        TokenInfo info = tokenStore.get(token);
+        if (info == null) {
+            return null;
+        }
+
+        // 判断是否过期
+        if (LocalDateTime.now().isAfter(info.expiresAt)) {
+            // 过期后移除 token
+            tokenStore.remove(token);
+            return null;
+        }
+
+        return info.userId;
     }
 }

@@ -1,5 +1,7 @@
 package com.example.appointmentservice.controller;
 
+import com.example.appointmentservice.auth.RequireLogin;
+import com.example.appointmentservice.auth.UserContext;
 import com.example.appointmentservice.dto.ApiResponse;
 import com.example.appointmentservice.dto.CreateAppointmentRequest;
 import com.example.appointmentservice.dto.LoginRequest;
@@ -42,20 +44,12 @@ public class AppointmentController {
      * Header: Authorization: Bearer <token>
      */
     @PostMapping("/appointments")
+    @RequireLogin
     public ApiResponse<Appointment> createAppointment(
-            @RequestHeader(value = "Authorization", required = false) String token,
             @Valid @RequestBody CreateAppointmentRequest request) {
 
         try {
-            // 处理 Token 前缀
-            if (token != null && token.startsWith("Bearer ")) {
-                token = token.substring(7);
-            }
-
-            Long userId = authService.getUserIdByToken(token);
-            if (userId == null) {
-                return ApiResponse.error(401, "未登录或 Token 失效");
-            }
+            Long userId = UserContext.getUserId();
 
             Appointment appointment = appointmentService.createAppointment(
                     userId,
@@ -77,17 +71,10 @@ public class AppointmentController {
      * Header: Authorization: Bearer <token>
      */
     @GetMapping("/appointments")
-    public ApiResponse<List<Appointment>> getMyAppointments(
-            @RequestHeader(value = "Authorization", required = false) String token) {
+    @RequireLogin
+    public ApiResponse<List<Appointment>> getMyAppointments() {
 
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
-
-        Long userId = authService.getUserIdByToken(token);
-        if (userId == null) {
-            return ApiResponse.error(401, "未登录或 Token 失效");
-        }
+        Long userId = UserContext.getUserId();
 
         List<Appointment> list = appointmentService.getMyAppointments(userId);
         return ApiResponse.success(list);
