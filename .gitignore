@@ -1,0 +1,50 @@
+### Root-level ignores
+.DS_Store
+*.log
+logs/
+*.tmp
+*.swp
+*.swo
+*.pid
+
+### Node / Frontend (frontend/)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.cache/
+frontend/.temp/
+frontend/coverage/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.eslintcache
+frontend/.stylelintcache
+frontend/.parcel-cache/
+frontend/.turbo/
+frontend/.next/
+frontend/.nuxt/
+frontend/.vite/
+
+### Frontend editor / tooling
+frontend/.idea/
+frontend/.vscode/
+frontend/*.local.*
+
+### Java / Gradle backend (backend/)
+backend/**/.gradle/
+backend/**/build/
+backend/**/out/
+backend/**/bin/
+
+### OS / IDE general
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+### Environment / secrets (if any are created)
+.env
+.env.*.local
+.env.local
+

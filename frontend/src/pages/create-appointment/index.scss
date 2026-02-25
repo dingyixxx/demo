@@ -1,0 +1,88 @@
+/* 页面整体容器 */
+.container {
+  min-height: 100vh;
+  padding: 32px 24px 40px;
+  background: #f5f7fb;
+  box-sizing: border-box;
+}
+
+/* 表单卡片 */
+.form {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px 28px 36px;
+  box-shadow: 0 8px 24px rgba(15, 35, 95, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 字段标题 */
+.label {
+  font-size: 28px;
+  margin-bottom: 12px;
+  margin-top: 20px;
+  color: #222;
+  font-weight: 500;
+}
+
+.label:first-child {
+  margin-top: 0;
+}
+
+/* 输入和日期选择 */
+.input,
+.picker {
+  height: 88px;
+  background-color: #f6f8ff;
+  border-radius: 12px;
+  padding: 0 24px;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  border: 1px solid #e0e5ff;
+}
+
+.input {
+  /* 微信小程序 Input 自身会占满宽度，这里主要是背景和圆角容器 */
+}
+
+.picker {
+  color: #333;
+}
+
+/* 时间段单选区域 */
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+  margin: 0 12px 12px 0;
+  border-radius: 999px;
+  background: #f6f7fb;
+  border: 1px solid #e0e3f0;
+}
+
+.radio-text {
+  font-size: 26px;
+  color: #333;
+  margin-left: 8px;
+}
+
+/* 选中态：利用小程序的 checked + 样式 */
+radio[checked='true'] + .radio-text {
+  color: #1a73e8;
+  font-weight: 500;
+}
+
+.btn {
+  margin-top: 40px;
+  height: 88px;
+  font-size: 30px;
+  border-radius: 44px;
+}
